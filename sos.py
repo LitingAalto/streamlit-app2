@@ -157,6 +157,7 @@ with st.expander("Input more Keywords"):
 kw_dict = {k: v for k, v in kw_dict.items() if v!=''}
 search = list(kw_dict.keys())
 
+@st.cache
 def keywords_list(search):
     df=pd.DataFrame()
     search1 = search.copy()
@@ -192,6 +193,7 @@ def merge2df(df1, df2):
     df.columns = [ x.split('_x')[0] for x in df.columns]
     return df.drop('trans',1)
 
+@st.cache
 def sos_calculator(search,duration,group, smoothing):
     df=pd.DataFrame()
     ll = keywords_list(search)
