@@ -177,7 +177,9 @@ def merge2df(df1, df2):
 
 def sos_calculator(search,duration,group, smoothing):
     df=pd.DataFrame()
-    for keywords in keywords_list(search):
+    ll = keywords_list(search)
+    print(ll)
+    for keywords in ll:
         pytrend.build_payload(keywords, cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         if df.shape[0]>0:
