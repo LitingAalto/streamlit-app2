@@ -1,17 +1,17 @@
 # app/Dockerfile
 
 FROM python:3.9-slim
-
+EXPOSE 8501
 COPY . /app
 WORKDIR /app
 
 RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
+RUN apt-get install -y python3-pip python-dev build-essential
 
 
 
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
-ENTRYPOINT ["streamlit", "run", "sos.py"]
+ENTRYPOINT ["streamlit", "run", "sos.py", "--server.port=8080","--server.address=0.0.0.0"]
 
 
