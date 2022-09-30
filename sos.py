@@ -147,7 +147,11 @@ def keywords_list(search):
     search1 = search.copy()
     while len(search)>1:
         pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
-        df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+        try:
+            df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+        except:
+            time.sleep(1)
+            df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         df = pd.concat([df1.drop('date',1), df] ,1)  
         search = list(set(search)-set(search[:5]))
     s = (df == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[:math.ceil((len(search1)-1)/4)-1]
@@ -178,7 +182,6 @@ def merge2df(df1, df2):
 def sos_calculator(search,duration,group, smoothing):
     df=pd.DataFrame()
     ll = keywords_list(search)
-    print(ll)
     for keywords in ll:
         pytrend.build_payload(keywords, cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
