@@ -2,15 +2,31 @@ import streamlit as st
 import numpy as np
 import datetime
 import pandas as pd                        
-from pytrends.request import TrendReq
 import plotly.express as px
 import matplotlib.pyplot as plt
 import warnings
 import time
 import math
 warnings.filterwarnings("ignore") 
-pytrend = TrendReq()
+from pytrends.request import TrendReq as UTrendReq
+GET_METHOD='get'
 
+import requests
+
+headers = {
+    'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
+    'Referer': 'https://trends.google.com/',
+    'sec-ch-ua-mobile': '?0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+    'sec-ch-ua-platform': '"Windows"',
+}
+
+
+class TrendReq(UTrendReq):
+    def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
+        return super()._get_data(url, method=GET_METHOD, trim_chars=trim_chars, headers=headers, **kwargs)
+
+pytrend = TrendReq(hl='en-US', tz=120, timeout=(5,10))
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Share Of Search</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: darkgrey;'>Automates search and save the needed keywords for modelling</h2>", unsafe_allow_html=True)
@@ -146,7 +162,6 @@ def keywords_list(search):
     df=pd.DataFrame()
     search1 = search.copy()
     while len(search)>1:
-        time.sleep(2)
         pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         df = pd.concat([df1.drop('date',1), df] ,1)  
