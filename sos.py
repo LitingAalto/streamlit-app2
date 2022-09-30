@@ -8,23 +8,7 @@ import warnings
 import time
 import math
 warnings.filterwarnings("ignore") 
-from pytrends.request import TrendReq as UTrendReq
-GET_METHOD='get'
-
-import requests
-
-headers = {
-    'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
-    'Referer': 'https://trends.google.com/',
-    'sec-ch-ua-mobile': '?0',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-    'sec-ch-ua-platform': '"Windows"',
-}
-
-class TrendReq(UTrendReq):
-    def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
-        return super()._get_data(url, method=GET_METHOD, trim_chars=trim_chars, headers=headers, **kwargs)
-
+from pytrends.request import TrendReq
 pytrend = TrendReq()
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Share Of Search</h1>", unsafe_allow_html=True)
