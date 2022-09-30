@@ -9,7 +9,7 @@ import warnings
 import time
 import math
 warnings.filterwarnings("ignore") 
-pytrend = TrendReq(hl='en-US', tz=120, timeout=(5,10))
+pytrend = TrendReq()
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Share Of Search</h1>", unsafe_allow_html=True)
