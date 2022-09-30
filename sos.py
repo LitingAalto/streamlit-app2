@@ -26,7 +26,7 @@ class TrendReq(UTrendReq):
     def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
         return super()._get_data(url, method=GET_METHOD, trim_chars=trim_chars, headers=headers, **kwargs)
 
-pytrend = TrendReq(hl='en-US', tz=120, timeout=(5,10))
+pytrend = TrendReq()
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Share Of Search</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: darkgrey;'>Automates search and save the needed keywords for modelling</h2>", unsafe_allow_html=True)
