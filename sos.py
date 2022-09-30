@@ -161,10 +161,12 @@ def keywords_list(search):
     df=pd.DataFrame()
     search1 = search.copy()
     while len(search)>1:
+        time.sleep(5)
         pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         df = pd.concat([df1.drop('date',1), df] ,1)  
         search = list(set(search)-set(search[:5]))
+        time.sleep(5)
     s = (df == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[:math.ceil((len(search1)-1)/4)-1]
     search1 = list(set(search1)-set(s))
     if len(s) == 0:
