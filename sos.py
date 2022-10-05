@@ -14,7 +14,27 @@ from io import BytesIO
 warnings.filterwarnings("ignore") 
 from pytrends.request import TrendReq
 pytrend = TrendReq()
+<<<<<<< HEAD
+=======
+# from pytrends.request import TrendReq as UTrendReq
+# GET_METHOD='get'
+>>>>>>> 91994c4b8dd873fcbb05614201d7a7299f905086
 
+# import requests
+
+# headers = {
+#     'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
+#     'Referer': 'https://trends.google.com/',
+#     'sec-ch-ua-mobile': '?0',
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+#     'sec-ch-ua-platform': '"Windows"',
+# }
+
+
+class TrendReq(UTrendReq):
+    def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
+        return super()._get_data(url, method=GET_METHOD, trim_chars=trim_chars, headers=headers, **kwargs)
+    
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Google Trends</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: darkgrey;'>Automates search and save the needed keywords for modelling</h2>", unsafe_allow_html=True)
@@ -132,6 +152,7 @@ with st.expander("Input more Keywords"):
 
 kw_dict = {k: v for k, v in kw_dict.items() if v!=''}
 
+<<<<<<< HEAD
 def merge2df(df1, df2):
     df=df1.merge(df2, on='date')
     df['trans']=df[df.filter(regex='_x').columns].values/df[df.filter(regex='_y').columns].values
@@ -145,9 +166,14 @@ def merge2df(df1, df2):
     return df.drop('trans',1)
 
 def keywords_list(kw_dict, duration = duration):
+=======
+@st.cache
+def keywords_list(search):
+>>>>>>> 91994c4b8dd873fcbb05614201d7a7299f905086
     df=pd.DataFrame()
     search1 = search = list(kw_dict.keys())
     while len(search)>1:
+        time.sleep(3)
         pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         df = pd.concat([df1.drop('date',1), df] ,1)      
@@ -166,9 +192,17 @@ def keywords_list(kw_dict, duration = duration):
         return [search1[:4]+[s[0]],[s[0]]+search1[4:7]+[s[1]],[s[1]]+search1[7:10]+[s[2]],[s[2]]+search1[10:13]+[s[3]],[s[3]]+search1[13:]]
 
 
+<<<<<<< HEAD
 def sos_calculator(kw_dict, duration=duration, category = category):
     df=pd.DataFrame()
     for keywords in keywords_list(kw_dict, duration = duration):
+=======
+@st.cache
+def sos_calculator(search,duration,group, smoothing):
+    df=pd.DataFrame()
+    ll = keywords_list(search)
+    for keywords in ll:
+>>>>>>> 91994c4b8dd873fcbb05614201d7a7299f905086
         pytrend.build_payload(keywords, cat=0, timeframe=duration, geo='FI', gprop='')
         df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
         if df.shape[0]>0:
@@ -213,6 +247,7 @@ if st.button('Calculate Google trends'):
         st.plotly_chart(fig1, use_container_width=True)
         
 
+<<<<<<< HEAD
     def to_excel(df):
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -251,3 +286,13 @@ df_xlsx = to_excel2(keyw)
 st.download_button(label='Download keywords lists for BI report',
                                 data=df_xlsx ,
                                 file_name= 'keywordlist.xlsx')
+=======
+    with col2:
+        fig3 = px.line(dfn, x="date", y=list(kw_dict.values()), title='Share of Search Over Time')
+        df1=pd.DataFrame()
+        df1['share']=(dfn.mean()/(dfn.mean().sum())).values
+        df1['names']=(dfn.mean()/(dfn.mean().sum())).index
+        fig4 = px.pie(df1, values='share', names='names', title='Share of Search in %',hole=.65)
+        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig4, use_container_width=True)
+>>>>>>> 91994c4b8dd873fcbb05614201d7a7299f905086
