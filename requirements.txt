@@ -5,3 +5,4 @@ plotly==5.10.0
 pytrends==4.8.0
 streamlit==1.12.2
 seaborn==0.12.0
+openpyxl==3.0.10
