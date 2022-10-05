@@ -8,7 +8,6 @@ import seaborn as sns
 import warnings
 import time
 import math
-import xlsxwriter
 from datetime import date
 from io import BytesIO
 warnings.filterwarnings("ignore") 
@@ -201,9 +200,6 @@ if st.button('Calculate Google trends'):
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True)
         plt.savefig("python.png")
         
-#         if st.button('Save keywords for reporting and modeling'):
-#         with open('report.txt','a') as f:
-#             f.write(str(kw_dict)+'\n')
     with col2:
         df1=pd.DataFrame()
         df1['share']=(df.mean()/(df.mean().sum())).values
