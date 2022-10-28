@@ -126,7 +126,7 @@ def merge2df(df1, df2):
 def sos_calculator(kw_dict, duration=duration, category = category):
     df=pd.DataFrame()
     search = list(kw_dict.keys())
-    t=10
+    t=60
     not_found = []
     while len(search)>1:
         time.sleep(t)
@@ -137,9 +137,9 @@ def sos_calculator(kw_dict, duration=duration, category = category):
                 key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
                 st.text(f'searching....{search[:4]+[key1]}')
                 pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend.interest_over_time(sleep=60).reset_index().drop('isPartial',1)
+                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
                 df = merge2df(df, df1)
-                t+=30
+                t+=50
             except:
                 st.text(f'No data from below keywordlist:\n{search[:4]+[key1]}')
                 not_found = not_found + search[:4]+[key1]
@@ -150,9 +150,9 @@ def sos_calculator(kw_dict, duration=duration, category = category):
                 pytrend2 = TrendReq()
                 st.text(f'searching....{search[:5]}')
                 pytrend2.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend2.interest_over_time(sleep=60).reset_index().drop('isPartial',1)
+                df1 = pytrend2.interest_over_time().reset_index().drop('isPartial',1)
                 df = df1.copy()
-                t+=30
+                t+=50
             except:
                 st.text(f'No data from below keywordlist:\n{search[:5]}')
                 not_found = not_found + search[:5]
