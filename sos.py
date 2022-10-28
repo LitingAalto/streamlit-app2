@@ -36,28 +36,28 @@ st.text(" ")
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 kw_dict = {}
 with col1:
-    word = st.text_input('Key Word1', value = "Elisa mobiililaajakaista")
-    afflix = st.text_input('Afflix1', value = "Elisa")
+    word = st.text_input('Key Word1')
+    afflix = st.text_input('Afflix1')
     kw_dict[word]=afflix
 with col2:
-    word = st.text_input('Key Word2', value = "Saunalahti mobiililaajakaista")
-    afflix = st.text_input('Afflix2', value = "Elisa")
+    word = st.text_input('Key Word2')
+    afflix = st.text_input('Afflix2')
     kw_dict[word]=afflix
 with col3:
-    word = st.text_input('Key Word3', value = "DNA mobiililaajakaista")
-    afflix = st.text_input('Afflix3', value = "DNA")
+    word = st.text_input('Key Word3')
+    afflix = st.text_input('Afflix3')
     kw_dict[word]=afflix
 with col4:
-    word = st.text_input('Key Word4', value = "Telia mobiililaajakaista")
-    afflix = st.text_input('Afflix4', value = "Telia")
+    word = st.text_input('Key Word4')
+    afflix = st.text_input('Afflix4')
     kw_dict[word]=afflix
 with col5:
-    word = st.text_input('Key Word5', value = "Sonera mobiililaajakaista")
-    afflix = st.text_input('Afflix5', value = "Telia")
+    word = st.text_input('Key Word5')
+    afflix = st.text_input('Afflix5')
     kw_dict[word]=afflix
 with col6:
-    word = st.text_input('Key Word6', value = "Moi mobiililaajakaista")
-    afflix = st.text_input('Afflix6', value = "Moi")
+    word = st.text_input('Key Word6')
+    afflix = st.text_input('Afflix6')
     kw_dict[word]=afflix
 with col7:
     word = st.text_input('Key Word7')
