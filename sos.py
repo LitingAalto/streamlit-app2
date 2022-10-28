@@ -12,7 +12,6 @@ from datetime import date
 from io import BytesIO
 warnings.filterwarnings("ignore") 
 from pytrends.request import TrendReq
-pytrend = TrendReq()
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>Google Trends</h1>", unsafe_allow_html=True)
