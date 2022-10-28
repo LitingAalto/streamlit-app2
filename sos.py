@@ -173,6 +173,7 @@ if st.button('Calculate Google trends'):
     df_weekly, df_monthly, df = sos_calculator(kw_dict,duration, category = category )
     col1, col2 = st.columns(2)
     with col1:
+        st.dataframe(df)
         fig = px.line(df, x="date", y=list(set(kw_dict.values())), title='Share of Search Over Time (Monthly aggregated)')
         
         st.plotly_chart(fig, use_container_width=True)
