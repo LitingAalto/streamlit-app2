@@ -126,7 +126,8 @@ def merge2df(df1, df2):
 def sos_calculator(kw_dict, duration=duration, category = category):
     df=pd.DataFrame()
     search = list(kw_dict.keys())
-    t=30
+    t=10
+    not_found = []
     while len(search)>1:
         time.sleep(t)
         print(search)
@@ -134,27 +135,27 @@ def sos_calculator(kw_dict, duration=duration, category = category):
             try:
                 pytrend = TrendReq()
                 key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
-                st.text(search[:4]+[key1])
+                st.text(f'searching....{search[:4]+[key1]}')
                 pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+                df1 = pytrend.interest_over_time(sleep=60).reset_index().drop('isPartial',1)
                 df = merge2df(df, df1)
-                st.dataframe(df1)
-                st.dataframe(df)
                 t+=30
             except:
                 st.text(f'No data from below keywordlist:\n{search[:4]+[key1]}')
+                not_found = not_found + search[:4]+[key1]
                 t+=60
             search = list(set(search)-set(search[:4]))
         else:
             try:
-                st.text(search[:5])
                 pytrend2 = TrendReq()
+                st.text(f'searching....{search[:5]}')
                 pytrend2.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend2.interest_over_time().reset_index().drop('isPartial',1)
+                df1 = pytrend2.interest_over_time(sleep=60).reset_index().drop('isPartial',1)
                 df = df1.copy()
                 t+=30
             except:
                 st.text(f'No data from below keywordlist:\n{search[:5]}')
+                not_found = not_found + search[:5]
                 t+=60
             search = list(set(search)-set(search[:5]))
              
@@ -176,7 +177,9 @@ if st.button('Calculate Google trends'):
     df_weekly, df_monthly, df = sos_calculator(kw_dict,duration, category = category )
     col1, col2 = st.columns(2)
     with col1:
-        st.dataframe(df)
+        if len(not_found)>0:
+            st.dataframe(df)
+            st.text(f'not found these keywords {not_found}')
         fig = px.line(df, x="date", y=[i for i in set(kw_dict.values()) if i in df.columns], title='Share of Search Over Time (Monthly aggregated)')
         
         st.plotly_chart(fig, use_container_width=True)
