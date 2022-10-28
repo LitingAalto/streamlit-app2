@@ -34,7 +34,7 @@ st.markdown("<h5 style='text-align: left; color: black;'>\nInput here keywords a
 category = st.text_input('Category name for the keywords set for search', value = 'Mobiililaajakaistaliittymät')
 st.text(" ")
 
-col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 kw_dict = {}
 with col1:
     word = st.text_input('Key Word1', value = "Elisa mobiililaajakaista")
@@ -64,69 +64,50 @@ with col7:
     word = st.text_input('Key Word7')
     afflix = st.text_input('Afflix7')
     kw_dict[word]=afflix
-with col8:
-    word = st.text_input('Key Word8')
-    afflix = st.text_input('Afflix8')
-    kw_dict[word]=afflix
 
 with st.expander("Input more Keywords"):
-    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+    col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
+        word = st.text_input('Key Word8')
+        afflix = st.text_input('Afflix8')
+        kw_dict[word]=afflix
+        st.text(" ")
+        word = st.text_input('Key Word13')
+        afflix = st.text_input('Afflix13')
+        kw_dict[word]=afflix
+    with col2:
         word = st.text_input('Key Word9')
         afflix = st.text_input('Afflix9')
+        kw_dict[word]=afflix
+        st.text(" ")
+        word = st.text_input('Key Word14')
+        afflix = st.text_input('Afflix14')
+        kw_dict[word]=afflix
+    with col3:
+        word = st.text_input('Key Word10')
+        afflix = st.text_input('Afflix10')
+        kw_dict[word]=afflix
+        st.text(" ")
+        word = st.text_input('Key Word15')
+        afflix = st.text_input('Afflix15')
+        kw_dict[word]=afflix
+    with col4:
+        word = st.text_input('Key Word11')
+        afflix = st.text_input('Afflix11')
         kw_dict[word]=afflix
         st.text(" ")
         word = st.text_input('Key Word16')
         afflix = st.text_input('Afflix16')
         kw_dict[word]=afflix
-    with col2:
-        word = st.text_input('Key Word10')
-        afflix = st.text_input('Afflix10')
+    with col5:
+        word = st.text_input('Key Word12')
+        afflix = st.text_input('Afflix12')
         kw_dict[word]=afflix
         st.text(" ")
         word = st.text_input('Key Word17')
         afflix = st.text_input('Afflix17')
         kw_dict[word]=afflix
-    with col3:
-        word = st.text_input('Key Word11')
-        afflix = st.text_input('Afflix11')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word18')
-        afflix = st.text_input('Afflix18')
-        kw_dict[word]=afflix
-    with col4:
-        word = st.text_input('Key Word12')
-        afflix = st.text_input('Afflix12')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word19')
-        afflix = st.text_input('Afflix19')
-        kw_dict[word]=afflix
-    with col5:
-        word = st.text_input('Key Word13')
-        afflix = st.text_input('Afflix13')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word20')
-        afflix = st.text_input('Afflix20')
-        kw_dict[word]=afflix
-    with col6:
-        word = st.text_input('Key Word14')
-        afflix = st.text_input('Afflix14')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word21')
-        afflix = st.text_input('Afflix21')
-        kw_dict[word]=afflix
-    with col7:
-        word = st.text_input('Key Word15')
-        afflix = st.text_input('Afflix15')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word22')
-        afflix = st.text_input('Afflix22')
-        kw_dict[word]=afflix
+
         
 
 kw_dict = {k: v for k, v in kw_dict.items() if v!=''}
@@ -143,38 +124,37 @@ def merge2df(df1, df2):
     df.columns = [ x.split('_x')[0] for x in df.columns]
     return df.drop('trans',1)
 
-def keywords_list(kw_dict, duration = duration):
-    df=pd.DataFrame()
-    search1 = search = list(kw_dict.keys())
-    while len(search)>1:
-        pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
-        df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
-        df = pd.concat([df1.drop('date',1), df] ,1)      
-        search = list(set(search)-set(search[:5]))
-    s = (df == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[:math.ceil((len(search1)-1)/4)-1]
-    search1 = list(set(search1)-set(s))
-    if len(s) == 0:
-        return [search1]
-    elif len(s) == 1:
-        return [search1[:4]+[s[0]],[s[0]]+search1[4:]]
-    elif len(s) == 2:
-        return [search1[:4]+[s[0]],[s[0]]+search1[4:7]+[s[1]],[s[1]]+search1[7:]]
-    elif len(s) == 3:
-        return [search1[:4]+[s[0]],[s[0]]+search1[4:7]+[s[1]],[s[1]]+search1[7:10]+[s[2]],[s[2]]+search1[10:]]
-    elif len(s) == 4:
-        return [search1[:4]+[s[0]],[s[0]]+search1[4:7]+[s[1]],[s[1]]+search1[7:10]+[s[2]],[s[2]]+search1[10:13]+[s[3]],[s[3]]+search1[13:]]
-
-
 def sos_calculator(kw_dict, duration=duration, category = category):
     df=pd.DataFrame()
-    for keywords in keywords_list(kw_dict, duration = duration):
-        pytrend.build_payload(keywords, cat=0, timeframe=duration, geo='FI', gprop='')
-        df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+    search = list(kw_dict.keys())
+    t=30
+    while len(search)>1:
+        time.sleep(t)
+        print(search)
         if df.shape[0]>0:
-            df = merge2df(df, df1)
+            try:
+                key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
+                print(search[:4]+[key1])
+                pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
+                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+                df = merge2df(df, df1)
+                t+=30
+            except:
+                st.text(f'No data from below keywordlist:\n{search[:4]+[key1]}')
+                t+=60
+            search = list(set(search)-set(search[:4]))
         else:
-            df = df1.copy()
-    
+            try:
+                print(search[:5])
+                pytrend.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
+                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+                df = df1.copy()
+                t+=30
+            except:
+                st.text(f'No data from below keywordlist:\n{search[:5]}')
+                t+=60
+            search = list(set(search)-set(search[:5]))
+             
     df=df.set_index('date')
     df0 = df.copy()
     df2 = df0.reset_index()
@@ -187,6 +167,7 @@ def sos_calculator(kw_dict, duration=duration, category = category):
     df2['date']=df2['date'].dt.to_period('M').astype('str')
     df2 = df2.groupby('date').mean().dropna() # monthly agg
     return df0.reset_index(), dfm.reset_index(), df2.reset_index()
+
 
 if st.button('Calculate Google trends'):
     df_weekly, df_monthly, df = sos_calculator(kw_dict,duration, category = category )
