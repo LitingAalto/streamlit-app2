@@ -122,7 +122,7 @@ def merge2df(df1, df2):
     df.columns = [ x.split('_x')[0] for x in df.columns]
     return df.drop('trans',1)
 
-def sos_calculator(kw_dict, duration=duration, category = category):
+def sos_calculator(kw_dict, category = category):
     df=pd.DataFrame()
     search = list(kw_dict.keys())
     t=60
