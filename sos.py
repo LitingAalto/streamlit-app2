@@ -195,7 +195,7 @@ def sos_calculator(kw_dict, category = category):
 
 
 if st.button('Calculate Google trends'):
-    df_weekly, df_monthly, df = sos_calculator(kw_dict,duration, category = category )
+    df_weekly, df_monthly, df = sos_calculator(kw_dict,category = category )
     col1, col2 = st.columns(2)
     with col1:
         if len(not_found)>0:
