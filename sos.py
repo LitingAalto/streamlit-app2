@@ -24,7 +24,6 @@ datetime.date(2020, 10, 1))
 end = st.date_input(
     "end date of comparison",
     date.today()- datetime.timedelta(days=date.today().weekday()+2))
-duration = str(start)+' '+str(end)
 
 
 
@@ -136,8 +135,19 @@ def sos_calculator(kw_dict, duration=duration, category = category):
                 pytrend = TrendReq()
                 key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
                 st.text(f'searching....{search[:4]+[key1]}')
-                pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
+                df1 = pytrend.get_historical_interest(
+                    search[:4]+[key1], 
+                    year_start=int(str(start).split("-")[0]), 
+                    month_start=int(str(start).split("-")[1]), 
+                    day_start=int(str(start).split("-")[2]), 
+                    year_end=int(str(end).split("-")[0]),  
+                    month_end=int(str(end).split("-")[1]),   
+                    day_end=int(str(end).split("-")[2]),  
+                    cat=0, 
+                    geo='FI',
+                    frequency = 'daily',
+                    sleep = 60
+                        )
                 df = merge2df(df, df1)
                 t+=50
             except:
@@ -149,8 +159,19 @@ def sos_calculator(kw_dict, duration=duration, category = category):
             try:
                 pytrend2 = TrendReq()
                 st.text(f'searching....{search[:5]}')
-                pytrend2.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
-                df1 = pytrend2.interest_over_time().reset_index().drop('isPartial',1)
+                df1 = pytrends2.get_historical_interest(
+                    search[:5], 
+                    year_start=int(str(start).split("-")[0]), 
+                    month_start=int(str(start).split("-")[1]), 
+                    day_start=int(str(start).split("-")[2]), 
+                    year_end=int(str(end).split("-")[0]),  
+                    month_end=int(str(end).split("-")[1]),   
+                    day_end=int(str(end).split("-")[2]),  
+                    cat=0, 
+                    geo='FI',
+                    frequency = 'daily',
+                    sleep = 60
+                        )
                 df = df1.copy()
                 t+=50
             except:
