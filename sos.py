@@ -1,267 +1,49 @@
-import streamlit as st
-import numpy as np
-import datetime
-import pandas as pd                        
-import plotly.express as px
-import matplotlib.pyplot as plt
-import seaborn as sns
-import warnings
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
-import math
-from datetime import date
-from io import BytesIO
-warnings.filterwarnings("ignore") 
-from pytrends.request import TrendReq
-
-st.set_page_config(layout="wide")
-st.markdown("<h1 style='text-align: center; color: black;'>Google Trends</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align: center; color: darkgrey;'>Automates search and save the needed keywords for modelling</h2>", unsafe_allow_html=True)
-keyw = pd.read_excel('keywordlist.xlsx').drop('Unnamed: 0',1)
-
-start = st.date_input(
-"start date of comparison",
-datetime.date(2020, 10, 1))
-end = st.date_input(
-    "end date of comparison",
-    date.today()- datetime.timedelta(days=date.today().weekday()+2))
 
 
-
-st.markdown("<h5 style='text-align: left; color: black;'>\nInput here keywords and their afflixes for Google trends comparison</h1>", unsafe_allow_html=True)
-
-category = st.text_input('Category name for the keywords set for search', value = 'Mobiililaajakaistaliittymät')
-st.text(" ")
-
-col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-kw_dict = {}
-with col1:
-    word = st.text_input('Key Word1')
-    afflix = st.text_input('Afflix1')
-    kw_dict[word]=afflix
-with col2:
-    word = st.text_input('Key Word2')
-    afflix = st.text_input('Afflix2')
-    kw_dict[word]=afflix
-with col3:
-    word = st.text_input('Key Word3')
-    afflix = st.text_input('Afflix3')
-    kw_dict[word]=afflix
-with col4:
-    word = st.text_input('Key Word4')
-    afflix = st.text_input('Afflix4')
-    kw_dict[word]=afflix
-with col5:
-    word = st.text_input('Key Word5')
-    afflix = st.text_input('Afflix5')
-    kw_dict[word]=afflix
-with col6:
-    word = st.text_input('Key Word6')
-    afflix = st.text_input('Afflix6')
-    kw_dict[word]=afflix
-with col7:
-    word = st.text_input('Key Word7')
-    afflix = st.text_input('Afflix7')
-    kw_dict[word]=afflix
-
-with st.expander("Input more Keywords"):
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        word = st.text_input('Key Word8')
-        afflix = st.text_input('Afflix8')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word13')
-        afflix = st.text_input('Afflix13')
-        kw_dict[word]=afflix
-    with col2:
-        word = st.text_input('Key Word9')
-        afflix = st.text_input('Afflix9')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word14')
-        afflix = st.text_input('Afflix14')
-        kw_dict[word]=afflix
-    with col3:
-        word = st.text_input('Key Word10')
-        afflix = st.text_input('Afflix10')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word15')
-        afflix = st.text_input('Afflix15')
-        kw_dict[word]=afflix
-    with col4:
-        word = st.text_input('Key Word11')
-        afflix = st.text_input('Afflix11')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word16')
-        afflix = st.text_input('Afflix16')
-        kw_dict[word]=afflix
-    with col5:
-        word = st.text_input('Key Word12')
-        afflix = st.text_input('Afflix12')
-        kw_dict[word]=afflix
-        st.text(" ")
-        word = st.text_input('Key Word17')
-        afflix = st.text_input('Afflix17')
-        kw_dict[word]=afflix
-
-        
-
-kw_dict = {k: v for k, v in kw_dict.items() if v!=''}
-
-def merge2df(df1, df2):
-    df=df1.merge(df2, on='date')
-    df['trans']=df[df.filter(regex='_x').columns].values/df[df.filter(regex='_y').columns].values
-    df['trans']=df['trans'].fillna(df['trans'].mean())
-    for col in df.columns[-(df2.shape[1]-1):-1]:
-        if col != 'trans':
-            df[col] = df['trans']*df[col]
-            df[col] = df[col].fillna(0).apply(lambda x: int(round(x,0)))
-    df.drop(df.filter(regex='_y').columns,1, inplace=True)
-    df.columns = [ x.split('_x')[0] for x in df.columns]
-    return df.drop('trans',1)
-
-def sos_calculator(kw_dict, category = category):
-    df=pd.DataFrame()
-    search = list(kw_dict.keys())
-    t=60
-    not_found = []
-    while len(search)>1:
-        time.sleep(t)
-        print(search)
-        if df.shape[0]>0:
-            try:
-                pytrend = TrendReq()
-                key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
-                st.text(f'searching....{search[:4]+[key1]}')
-                df1 = pytrend.get_historical_interest(
-                    search[:4]+[key1], 
-                    year_start=int(str(start).split("-")[0]), 
-                    month_start=int(str(start).split("-")[1]), 
-                    day_start=int(str(start).split("-")[2]), 
-                    year_end=int(str(end).split("-")[0]),  
-                    month_end=int(str(end).split("-")[1]),   
-                    day_end=int(str(end).split("-")[2]),  
-                    cat=0, 
-                    geo='FI',
-                    frequency = 'daily',
-                    sleep = 60
-                        )
-                df = merge2df(df, df1)
-                t+=50
-            except:
-                st.text(f'No data from below keywordlist:\n{search[:4]+[key1]}')
-                not_found = not_found + search[:4]+[key1]
-                t+=60
-            search = list(set(search)-set(search[:4]))
-        else:
-            try:
-                pytrend2 = TrendReq()
-                st.text(f'searching....{search[:5]}')
-                df1 = pytrends2.get_historical_interest(
-                    search[:5], 
-                    year_start=int(str(start).split("-")[0]), 
-                    month_start=int(str(start).split("-")[1]), 
-                    day_start=int(str(start).split("-")[2]), 
-                    year_end=int(str(end).split("-")[0]),  
-                    month_end=int(str(end).split("-")[1]),   
-                    day_end=int(str(end).split("-")[2]),  
-                    cat=0, 
-                    geo='FI',
-                    frequency = 'daily',
-                    sleep = 60
-                        )
-                df = df1.copy()
-                t+=50
-            except:
-                st.text(f'No data from below keywordlist:\n{search[:5]}')
-                not_found = not_found + search[:5]
-                t+=60
-            search = list(set(search)-set(search[:5]))
-             
-    df=df.set_index('date')
-    df0 = df.copy()
-    df2 = df0.reset_index()
-    df2['date']=df2['date'].dt.to_period('M').astype('str')
-    dfm = df2.groupby('date').mean().dropna()
-    
-    df.columns=df.columns.map(kw_dict)
-    df = df.groupby(lambda x:x, axis=1).sum()
-    df2 = df.reset_index()
-    df2['date']=df2['date'].dt.to_period('M').astype('str')
-    df2 = df2.groupby('date').mean().dropna() # monthly agg
-    return df0.reset_index(), dfm.reset_index(), df2.reset_index()
+keywords = {
+  "Natural_Disaster" : ('Earthquake', 'Flood', 'Tsunami', 'Cyclone', 'Hurricane', 'Typhoon', 'Blizzard', 'Snow Storm', 'Hail', 'Drought', 'Tornado', 'Cold Wave', 'Heat Wave', 'Wildfires', 'Reconstruction', 'Climate Change', 'Global Warming', 'Emission', 'Carbon cycle', 'Carbon Credit', 'El Nino', 'La Nina', 'Ecosystem', 'Greenhouse gases', 'Methane', 'Landslide', 'Mudslide', 'Avalanche', 'Ozone', 'Storm'),
+  "Government_Policy_Change" : ('Government Shutdown', 'Brexit', 'Supreme Court', 'Justice department', 'Parliament', 'Congress', 'reserves', 'President', 'Prime Minister', 'Opposition Leader', 'Donald Trump', 'Theresa May', 'World Trade Organization', 'European Union', 'Subsidies', 'Elections', 'Impeachment', 'Jeremy Corbyn', 'Asylum', 'Immigrants', 'Border Wall', 'National Securities', 'Military'),
+  "Financial_Policy_Change" : ('Budget', 'Tariff', 'Trade', 'Capital Market', 'Interest Rates', 'Central Bank', 'GDP', 'Deficits ', 'surpluses', 'Inflation', 'Unemployment', 'Nonfarm Payrolls', 'Consumer Confidence', 'CPI', 'Treasury', 'Federal Reserve', 'Fed', 'Import', 'Export', 'ForEx', 'EXIM', 'Foriegn Exchange', 'Monetary Policy', 'Fiscal Policy', 'Tax', 'Embargo', 'Money laundering', 'GNP', 'Exchange Rate', 'Economy', 'USD', 'Pound Sterling', 'US Dollar', 'Australian Dollar', 'GBP', 'AUD', 'EUR', 'Sanction'),
+  "Social_Unrest" : ('Social Unrest', 'Terrorism', 'Protest ', 'Far Right', 'Nazi', 'KKK', 'Racism', 'Radicalism', 'Civil War', 'Attack', 'Nuclear', 'Revolution', 'Coup', 'Strikes', 'Riot', 'War', 'Election', 'Corruption', 'Civil Unrest', 'Extremist', 'Nationalist', 'Rebellion', 'movement', 'uprising', 'rioting', 'turmoil', 'Activist', 'Imprisonment', 'Overpopulation', 'Hunger', 'Poverty', 'NRA', 'Mass shooting', 'Shooting', 'Martial Law', 'National Emergency', 'Insurgency')
+}
 
 
-if st.button('Calculate Google trends'):
-    df_weekly, df_monthly, df = sos_calculator(kw_dict,category = category )
-    col1, col2 = st.columns(2)
-    with col1:
-        if len(not_found)>0:
-            st.dataframe(df)
-            st.text(f'not found these keywords {not_found}')
-        fig = px.line(df, x="date", y=[i for i in set(kw_dict.values()) if i in df.columns], title='Share of Search Over Time (Monthly aggregated)')
-        
-        st.plotly_chart(fig, use_container_width=True)
-        ax = sns.lineplot(data=df.set_index('date'))
-        plt.xticks(rotation=90)
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True)
-        plt.savefig("python.png")
-        
-    with col2:
-        df1=pd.DataFrame()
-        df1['share']=(df.mean()/(df.mean().sum())).values
-        df1['names']=(df.mean()/(df.mean().sum())).index
-        fig1 = px.pie(df1, values='share', names='names', title='Share of Search in %',hole=.65)
-        #fig1.show()  
-        st.plotly_chart(fig1, use_container_width=True)
-        
+webdriver_path = 'C:/Users/E115228/Downloads/chromedriver'
 
-    def to_excel(df):
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df_weekly.to_excel(writer, index=False, sheet_name='weekly_orign')
-        df_monthly.to_excel(writer, index=False, sheet_name='monthly_orign')
-        workbook = writer.book
-        worksheet = workbook.add_worksheet("Plot(Monthly aggregated)")
-        worksheet.insert_image('B2', 'python.png', {'x_offset': 15, 'y_offset': 1})
-        writer.save()
-        processed_data = output.getvalue()
-        return processed_data
-    df_xlsx = to_excel(df)
-    file = st.text_input('Name your file', value='5G google trends')
-    st.download_button(label='📥 Download trends data from the selected keywords',
-                                    data=df_xlsx ,
-                                    file_name= f'{file}.xlsx')
-# if st.button('♞ Add current keywords to BI reports! Be sure you add the right one, once it is added, it will be in reporting'):
-#     def keyword_excel(kw_dict, cat):
-#         df = pd.DataFrame(kw_dict.items(), columns=['keywords','afflix'])
-#         df['category'] = cat
-#         df['flag'] = 0
-#         return df
-#     if category not in keyw.category.unique():
-#         keyw = keyw.append(keyword_excel(kw_dict, category))
-#         keyw.to_excel('keywordlist.xlsx')
-#     else:
-#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory already exists, input a new one and add again!</h5>", unsafe_allow_html=True)
-def to_excel2(df):
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    keyw.to_excel(writer, index=False, sheet_name='keywords')
-    writer.save()
-    processed_data = output.getvalue()
-    return processed_data
-df_xlsx = to_excel2(keyw)
-st.download_button(label='Download keywords lists for BI report',
-                                data=df_xlsx ,
-                                file_name= 'keywordlist.xlsx')
-# rm_cat = st.text_input('Remove this category name from reporting list', value='Mobiililaajakaistaliittymät1')
-# if st.button('\26 When click this button the category will be removed from BI report! '):
-#     if rm_cat not in keyw.category.unique():
-#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory not found from reporting list!</h5>", unsafe_allow_html=True)
-#     else:
-#         keyw = keyw[keyw.category!=rm_cat]
-#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory removed.\n If you wish to download the updated keywordlist, please refresh the page.</h5>", unsafe_allow_html=True)
-#         keyw.to_excel('keywordlist.xlsx')
+def enable_headless_download(browser, download_path):
+    # Add missing support for chrome "send_command" to selenium webdriver
+    browser.command_executor._commands["send_command"] = \
+        ("POST", '/session/$sessionId/chromium/send_command')
+ 
+    params = {'cmd': 'Page.setDownloadBehavior',
+              'params': {'behavior': 'allow', 'downloadPath': download_path}}
+    browser.execute("send_command", params)
 
+# Add arguments telling Selenium to not actually open a window
+
+
+for keyword in keywords['Social_Unrest']:
+    download_path = 'data/' + keyword
+    chrome_options = Options()
+    download_prefs = {'download.default_directory' : download_path,
+                      'download.prompt_for_download' : False,
+                      'profile.default_content_settings.popups' : 0}
+
+    chrome_options.add_experimental_option('prefs', download_prefs)
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--window-size=1920x1080')
+    url = 'https://trends.google.com/trends/explore?date=2018-10-01%202019-04-08&geo=FI&q=' + keyword
+    # Start up browser
+    browser = webdriver.Chrome(executable_path=webdriver_path,chrome_options=chrome_options)
+    browser.get(url) 
+    enable_headless_download(browser, download_path)
+    # Load webpage
+    browser.get(url)
+    time.sleep(5)
+    button = browser.find_element("css selector",'.widget-actions-item.export')
+    button.click()
+    time.sleep(5)
+    browser.quit()
