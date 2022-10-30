@@ -136,11 +136,12 @@ def download_files(ind, keyword, t= 10):
                       'profile.default_content_settings.popups' : 0}
 
     chrome_options.add_experimental_option('prefs', download_prefs)
-    #chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--window-size=1920x1080')
     url = f'https://trends.google.com/trends/explore?date={str(start)}%20{str(end)}&geo=FI&q=' + keyword
     # Start up browser
-    browser = webdriver.Chrome(executable_path="/chromedriver/chromedriver.exe",chrome_options=chrome_options)
+    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
     browser.get(url) 
     enable_headless_download(browser, download_path)
     # Load webpage
