@@ -127,7 +127,7 @@ def enable_headless_download(browser, download_path):
 # Add arguments telling Selenium to not actually open a window
 
 def download_files(ind, keyword, t= 10):
-    download_path = "data\" + str(ind)
+    download_path = "\\" + str(ind)
     chrome_options = Options()
     download_prefs = {'download.default_directory' : download_path,
                       'download.prompt_for_download' : False,
@@ -151,7 +151,7 @@ def download_files(ind, keyword, t= 10):
     time.sleep(5)
     browser.quit()
     
-    list_of_files = glob.glob(download_path+"\*.csv") # * means all if need specific format then *.csv
+    list_of_files = glob.glob(download_path+"\\*.csv") # * means all if need specific format then *.csv
     latest_file = max(list_of_files, key=os.path.getctime)
     df = pd.read_csv(latest_file).reset_index()
     print(df)
