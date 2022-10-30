@@ -13,7 +13,6 @@ from io import BytesIO
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.utils import ChromeType
 import time
 import glob
 import os
@@ -141,7 +140,7 @@ def download_files(ind, keyword, t= 10):
     chrome_options.add_argument('--window-size=1920x1080')
     url = f'https://trends.google.com/trends/explore?date={str(start)}%20{str(end)}&geo=FI&q=' + keyword
     # Start up browser
-    browser = webdriver.Chrome(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install(),chrome_options=chrome_options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(),chrome_options=chrome_options)
     browser.get(url) 
     enable_headless_download(browser, download_path)
     # Load webpage
