@@ -20,7 +20,7 @@ RUN apt-get install -y python3-pip python-dev build-essential
 #     unzip /chromedriver/chromedriver* -d /chromedriver
 
 RUN pip install -r requirements.txt
-mkdir /home/seluser /home/seluser/downloads 
+RUN mkdir /home/seluser /home/seluser/downloads 
 
 ENTRYPOINT ["streamlit", "run", "sos.py", "--server.port=8080","--server.address=0.0.0.0"]
 
