@@ -138,7 +138,12 @@ def download_files(ind, keyword, t= 10):
     chrome_options.add_experimental_option('prefs', download_prefs)
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--window-size=1920x1080')
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1280x1696")
+    chrome_options.add_argument("--single-process")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-dev-tools")
+    chrome_options.add_argument("--no-zygote")
     url = f'https://trends.google.com/trends/explore?date={str(start)}%20{str(end)}&geo=FI&q=' + keyword
     # Start up browser
     browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
