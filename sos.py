@@ -127,7 +127,7 @@ def enable_headless_download(browser, download_path):
 # Add arguments telling Selenium to not actually open a window
 
 def download_files(ind, keyword, t= 10):
-    download_path = "\\" + str(ind)
+    download_path = "home/seluser/downloads/" + str(ind)
     chrome_options = Options()
     download_prefs = {'download.default_directory' : download_path,
                       'download.prompt_for_download' : False,
