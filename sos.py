@@ -146,7 +146,7 @@ def download_files(ind, keyword, t= 10):
     chrome_options.add_argument("--no-zygote")
     url = f'https://trends.google.com/trends/explore?date={str(start)}%20{str(end)}&geo=FI&q=' + keyword
     # Start up browser
-    browser = webdriver.Chrome("/chromedriver",chrome_options=chrome_options)
+    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
     browser.get(url) 
     enable_headless_download(browser, download_path)
     # Load webpage
