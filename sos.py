@@ -5,17 +5,31 @@ import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
+import warnings
 import time
 import math
 from datetime import date
 from io import BytesIO
-from selenium.webdriver.chrome.service import Service
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-import time
-import glob
-import os
+warnings.filterwarnings("ignore") 
+from pytrends.request import TrendReq
+# from pytrends.request import TrendReq as UTrendReq
+# GET_METHOD='get'
+# import requests
+
+# headers = {
+#     'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
+#     'Referer': 'https://trends.google.com/',
+#     'sec-ch-ua-mobile': '?0',
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+#     'sec-ch-ua-platform': '"Windows"',
+# }
+
+
+
+# class TrendReq(UTrendReq):
+#     def _get_data(self, url, method=GET_METHOD, trim_chars=0, **kwargs):
+#         return super()._get_data(url, method=GET_METHOD, trim_chars=trim_chars, headers=headers, **kwargs)
+
 
 
 st.set_page_config(layout="wide")
@@ -115,62 +129,10 @@ with st.expander("Input more Keywords"):
 
 kw_dict = {k: v for k, v in kw_dict.items() if v!=''}
 
-def enable_headless_download(browser, download_path):
-    # Add missing support for chrome "send_command" to selenium webdriver
-    browser.command_executor._commands["send_command"] = \
-        ("POST", '/session/$sessionId/chromium/send_command')
- 
-    params = {'cmd': 'Page.setDownloadBehavior',
-              'params': {'behavior': 'allow', 'downloadPath': download_path}}
-    browser.execute("send_command", params)
-
-# Add arguments telling Selenium to not actually open a window
-
-def download_files(ind, keyword, t= 10):
-    download_path =os.getcwd() + str(ind)
-    chrome_options = Options()
-    download_prefs = {'download.default_directory' : download_path,
-                      'download.prompt_for_download' : False,
-                      "download.directory_upgrade": True,
-                      "safebrowsing.enabled": False,
-                      'profile.default_content_settings.popups' : 0}
-
-    chrome_options.add_experimental_option('prefs', download_prefs)
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1280x1696")
-    chrome_options.add_argument("--single-process")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-dev-tools")
-    chrome_options.add_argument("--no-zygote")
-    url = f'https://trends.google.com/trends/explore?date={str(start)}%20{str(end)}&geo=FI&q=' + keyword
-    # Start up browser
-    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
-    browser.get(url) 
-    enable_headless_download(browser, download_path)
-    # Load webpage
-    browser.get(url)
-    time.sleep(t)
-    button = browser.find_element("css selector",'.widget-actions-item.export')
-    button.click()
-    time.sleep(5)
-    browser.quit()
-    
-    list_of_files = glob.glob(download_path+"/*.csv") # * means all if need specific format then *.csv
-    latest_file = max(list_of_files, key=os.path.getctime)
-    df = pd.read_csv(latest_file).reset_index()
-    print(df)
-    if df.shape[0]>1:
-        df1=df[1:]
-        df1.columns=[i.split(':')[0] if i not in ['Viikko','Week'] else 'date' for i in df.iloc[0]]
-        df1['date']=pd.to_datetime(df1['date'])
-        return df1.astype({col: float for col in set(df1.columns)-set(['date'])})
-    
 def merge2df(df1, df2):
     df=df1.merge(df2, on='date')
     df['trans']=df[df.filter(regex='_x').columns].values/df[df.filter(regex='_y').columns].values
-    df['trans']=df['trans'].fillna(df['trans'].mean())
+    df['trans']=df['trans'].fillna(df[df.filter(regex='_x').columns].mean()/df[df.filter(regex='_y').columns].mean())
     for col in df.columns[-(df2.shape[1]-1):-1]:
         if col != 'trans':
             df[col] = df['trans']*df[col]
@@ -182,64 +144,59 @@ def merge2df(df1, df2):
 def sos_calculator(kw_dict, category = category):
     df=pd.DataFrame()
     search = list(kw_dict.keys())
-    ind = 0
-    t=20
+    t=30
     while len(search)>0:
+        time.sleep(t)
+        print(search)
         if df.shape[0]>0:
-            key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
-            st.text(f"searching keywords:\n{search[:4]+[key1]}")
             try:
-                df1 = download_files(ind, (',').join(search[:4]+[key1]))
-                t+=10
-                time.sleep(t)
-            except:
-                st.text(f"Retrying... taking 120 more seconds to download")
-                df1 = download_files(ind, (',').join(search[:4]+[key1]), t=120)
-                t+=10
-                time.sleep(t)
-            if df1 is not None:
+                pytrend = TrendReq(hl='en-US', tz=0)
+                key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
+                st.text(search[:4]+[key1])
+                pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
+                df1 = pytrend.interest_over_time().reset_index().drop('isPartial',1)
                 df = merge2df(df, df1)
-            else:
+                st.dataframe(df1)
+                st.dataframe(df)
+                t+=30
+            except:
                 st.text(f'No data from below keywordlist:\n{search[:4]+[key1]}')
-            ind+=1
+                t+=60
             search = list(set(search)-set(search[:4]))
         else:
-            st.text(f"searching keywords:\n{search[:5]}")
             try:
-                df1=download_files(ind, (',').join(search[:5]))
-                t+=10
-                time.sleep(t)
-            except:
-                st.text(f"Retrying... taking 120 more seconds to download")
-                df1=download_files(ind, (',').join(search[:5]), t=120)
-                t+=10
-                time.sleep(t)
-            if df1 is not None:
+                st.text(search[:5])
+                pytrend2 = TrendReq(hl='en-US', tz=0)
+                pytrend2.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
+                df1 = pytrend2.interest_over_time().reset_index().drop('isPartial',1)
                 df = df1.copy()
-            else:
+                t+=30
+            except:
                 st.text(f'No data from below keywordlist:\n{search[:5]}')
-            ind+=1
+                t+=60
             search = list(set(search)-set(search[:5]))
-      
-    df=df.set_index('date')
-    df0 = df.copy()
-    df2 = df0.reset_index()
-    df2['date']=df2['date'].dt.to_period('M').astype('str')
-    dfm = df2.groupby('date').mean().dropna()
-    
-    df.columns=df.columns.map(kw_dict)
-    df = df.groupby(lambda x:x, axis=1).sum()
-    df2 = df.reset_index()
-    df2['date']=df2['date'].dt.to_period('M').astype('str')
-    df2 = df2.groupby('date').mean().dropna() # monthly agg
-    return df0.reset_index(), dfm.reset_index(), df2.reset_index()
+    if df.shape[0] ==0:
+        st.text('google blocked.. returned 0 data...')
+    else:
+        df=df.set_index('date')
+        df0 = df.copy()
+        df2 = df0.reset_index()
+        df2['date']=df2['date'].dt.to_period('M').astype('str')
+        dfm = df2.groupby('date').mean().dropna()
+
+        df.columns=df.columns.map(kw_dict)
+        df = df.groupby(lambda x:x, axis=1).sum()
+        df2 = df.reset_index()
+        df2['date']=df2['date'].dt.to_period('M').astype('str')
+        df2 = df2.groupby('date').mean().dropna() # monthly agg
+        return df0.reset_index(), dfm.reset_index(), df2.reset_index()
 
 
 if st.button('Calculate Google trends'):
     df_weekly, df_monthly, df = sos_calculator(kw_dict, category = category )
     col1, col2 = st.columns(2)
     with col1:
-        fig = px.line(df, x="date", y=[i for i in set(kw_dict.values()) if i in df.columns], title='Share of Search Over Time (Monthly aggregated)')
+        fig = px.line(df, x="date", y=list(set(kw_dict.values())), title='Share of Search Over Time (Monthly aggregated)')
         
         st.plotly_chart(fig, use_container_width=True)
         ax = sns.lineplot(data=df.set_index('date'))
@@ -272,3 +229,34 @@ if st.button('Calculate Google trends'):
     st.download_button(label='📥 Download trends data from the selected keywords',
                                     data=df_xlsx ,
                                     file_name= f'{file}.xlsx')
+# if st.button('♞ Add current keywords to BI reports! Be sure you add the right one, once it is added, it will be in reporting'):
+#     def keyword_excel(kw_dict, cat):
+#         df = pd.DataFrame(kw_dict.items(), columns=['keywords','afflix'])
+#         df['category'] = cat
+#         df['flag'] = 0
+#         return df
+#     if category not in keyw.category.unique():
+#         keyw = keyw.append(keyword_excel(kw_dict, category))
+#         keyw.to_excel('keywordlist.xlsx')
+#     else:
+#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory already exists, input a new one and add again!</h5>", unsafe_allow_html=True)
+def to_excel2(df):
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    keyw.to_excel(writer, index=False, sheet_name='keywords')
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
+df_xlsx = to_excel2(keyw)
+st.download_button(label='Download keywords lists for BI report',
+                                data=df_xlsx ,
+                                file_name= 'keywordlist.xlsx')
+# rm_cat = st.text_input('Remove this category name from reporting list', value='Mobiililaajakaistaliittymät1')
+# if st.button('\26 When click this button the category will be removed from BI report! '):
+#     if rm_cat not in keyw.category.unique():
+#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory not found from reporting list!</h5>", unsafe_allow_html=True)
+#     else:
+#         keyw = keyw[keyw.category!=rm_cat]
+#         st.markdown("<h5 style='text-align: left; color: black;'>\nCategory removed.\n If you wish to download the updated keywordlist, please refresh the page.</h5>", unsafe_allow_html=True)
+#         keyw.to_excel('keywordlist.xlsx')
+
