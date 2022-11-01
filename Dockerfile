@@ -7,6 +7,7 @@ WORKDIR /app
 
 RUN apt-get update -y
 RUN apt-get install -y python3-pip python-dev build-essential
+RUN apt-get update && apt-get install -y git
 
 RUN pip install -r requirements.txt
 RUN pip install --upgrade --user git+https://github.com/GeneralMills/pytrends
