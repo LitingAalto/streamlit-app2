@@ -150,7 +150,7 @@ def sos_calculator(kw_dict, category = category):
         print(search)
         if df.shape[0]>0:
             try:
-                pytrend = TrendReq(hl='en-US', tz=0)
+                pytrend = TrendReq()
                 key1=(df.set_index('date') == 0).astype(int).sum(axis=0).sort_values(ascending=True).index[0]
                 st.text(search[:4]+[key1])
                 pytrend.build_payload(search[:4]+[key1], cat=0, timeframe=duration, geo='FI', gprop='')
@@ -166,7 +166,7 @@ def sos_calculator(kw_dict, category = category):
         else:
             try:
                 st.text(search[:5])
-                pytrend2 = TrendReq(hl='en-US', tz=0)
+                pytrend2 = TrendReq()
                 pytrend2.build_payload(search[:5], cat=0, timeframe=duration, geo='FI', gprop='')
                 df1 = pytrend2.interest_over_time().reset_index().drop('isPartial',1)
                 df = df1.copy()
